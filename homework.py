@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Final, List
+from typing import List
 
 
 @dataclass
@@ -29,8 +29,8 @@ class Training:
        показа сообщений по тренировке"""
 
     LEN_STEP = 0.65
-    M_IN_KM: Final[int] = 1000
-    MIN_IN_H: Final[int] = 60
+    M_IN_KM = 1000
+    MIN_IN_H = 60
 
     def __init__(self, action: int, duration: float, weight: float) -> None:
         self.action: int = action
@@ -84,8 +84,8 @@ class SportsWalking(Training):
     LEN_STEP = 0.65
     CALORIES_WEIGHT_MULTIPLIER = 0.035
     CALORIES_SPEED_HEIGHT_MULTIPLIER = 0.029
-    KMH_IN_MSEC: Final[float] = 0.278
-    CM_IN_M: Final[int] = 100
+    KMH_IN_MSEC = 0.278
+    CM_IN_M = 100
 
     def __init__(
         self, action: int, duration: float, weight: float, height: float,
