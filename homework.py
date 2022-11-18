@@ -185,4 +185,4 @@ if __name__ == '__main__':
         try:
             main(read_package(workout_type, data))
         except ValueError as _ex:
-            print(_ex)
+            print(_ex)  # noqa: T201
