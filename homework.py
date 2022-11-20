@@ -2,6 +2,10 @@ from dataclasses import dataclass
 from typing import List
 
 
+class InvalidInputDataError(Exception):
+    pass
+
+
 @dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
@@ -23,10 +27,13 @@ class InfoMessage:
 
 
 class Training:
-    """Класс для расчета:
-       дистанции
-       средней скорости
-       показа сообщений по тренировке"""
+    """Расчет показателей тренировки.
+
+    get_distance - расчет дистанции
+    get_mean_speed - расчет скорости
+    get_spent_calories - расчет каллорий
+    show_training_info - показ сообщения тренировки
+    """
 
     LEN_STEP = 0.65
     M_IN_KM = 1000
@@ -42,7 +49,7 @@ class Training:
         return self.action * self.LEN_STEP / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
-        """Получить среднюю скорость движения """
+        """Получить среднюю скорость движения."""
         return self.get_distance() / self.duration
 
     def get_spent_calories(self) -> float:
@@ -60,9 +67,6 @@ class Training:
 
 
 class Running(Training):
-    """Тренировка: бег."""
-
-    LEN_STEP = 0.65
     CALORIES_MEAN_SPEED_MULTIPLIER = 18
     CALORIES_MEAN_SPEED_SHIFT = 1.79
 
@@ -80,11 +84,9 @@ class Running(Training):
 
 
 class SportsWalking(Training):
-
-    LEN_STEP = 0.65
     CALORIES_WEIGHT_MULTIPLIER = 0.035
     CALORIES_SPEED_HEIGHT_MULTIPLIER = 0.029
-    KMH_IN_MSEC = 0.278
+    KMH_IN_MSEC = 0.278  # 0.278 m/s in 1 km/h
     CM_IN_M = 100
 
     def __init__(
@@ -110,7 +112,7 @@ class SportsWalking(Training):
 
 
 class Swimming(Training):
-    """Перегрузка методов расчета средней скорости """
+    """Перегрузка методов расчета средней скорости."""
 
     LEN_STEP = 1.38
     CALORIES_WEIGHT_MULTIPLIER = 2
@@ -141,9 +143,6 @@ class Swimming(Training):
             * self.duration
         )
 
-# По идее основная программа должна лежать в одном файле
-# а классы в другом. Не знаю как проверяет практикум
-
 
 PACKAGES = [
     ('SWM', [720, 1, 80, 25, 40]),
@@ -152,35 +151,26 @@ PACKAGES = [
 ]
 
 TRAININGS = {
-    'SWM': [Swimming, 5],
-    'RUN': [Running, 3],
-    'WLK': [SportsWalking, 4],
+    'SWM': Swimming,
+    'RUN': Running,
+    'WLK': SportsWalking,
 }
 
 
-def read_package(workout_type: str, data: List[int]) -> Training:
+def read_package(workout_type: str, data: List[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
-
-    # Проверка на вхождения ключа в словарь ключей
-    if workout_type not in TRAININGS:
-        raise ValueError(f'Workout type "{workout_type}" not acceptable.')
-
-    # Проверка на консистентность данных пакета
-    if len(data) != TRAININGS[workout_type][1]:
-        raise ValueError(f'Package: {data} out of range.'
-                         f' Size should be {TRAININGS[workout_type][1]}')
-
-    return TRAININGS[workout_type][0](*data)
+    try:
+        return TRAININGS[workout_type](*data)
+    except (KeyError, TypeError) as err:
+        raise InvalidInputDataError(err)
 
 
 def main(training: Training) -> None:
+
     print(training.show_training_info().get_message())  # noqa: T201
 
 
 if __name__ == '__main__':
 
     for workout_type, data in PACKAGES:
-        try:
-            main(read_package(workout_type, data))
-        except ValueError as _ex:
-            print(_ex)  # noqa: T201
+        main(read_package(workout_type, data))
