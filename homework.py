@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+import csv
 
 
 class InvalidInputDataError(Exception):
@@ -90,7 +91,11 @@ class SportsWalking(Training):
     CM_IN_M = 100
 
     def __init__(
-        self, action: int, duration: float, weight: float, height: float,
+        self,
+        action: int,
+        duration: float,
+        weight: float,
+        height: float,
     ) -> None:
         super().__init__(action, duration, weight)
         self.height = height
@@ -144,17 +149,37 @@ class Swimming(Training):
         )
 
 
-PACKAGES = [
-    ('SWM', [720, 1, 80, 25, 40]),
-    ('RUN', [15000, 1, 75]),
-    ('WLK', [9000, 1, 75, 180]),
-]
-
 TRAININGS = {
     'SWM': Swimming,
     'RUN': Running,
     'WLK': SportsWalking,
 }
+
+
+def read_packages_from_file(filename):
+    packages = []
+    with open(filename) as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            data = []
+            if row['Action']:
+                data.append(float(row['Action']))
+
+            if row['Duration']:
+                data.append(float(row['Duration']))
+
+            if row['Meta1']:
+                data.append(float(row['Meta1']))
+
+            if row['Meta2']:
+                data.append(float(row['Meta2']))
+
+            if row['Meta3']:
+                data.append(float(row['Meta3']))
+
+            packages.append((row['TraingType'], data))
+
+    return packages
 
 
 def read_package(workout_type: str, data: List[float]) -> Training:
@@ -172,5 +197,5 @@ def main(training: Training) -> None:
 
 if __name__ == '__main__':
 
-    for workout_type, data in PACKAGES:
+    for workout_type, data in read_packages_from_file('packages.csv'):
         main(read_package(workout_type, data))

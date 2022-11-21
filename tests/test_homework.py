@@ -197,7 +197,12 @@ def test_Training_get_mean_speed(input_data, expected):
 
 
 @pytest.mark.parametrize(
-    'input_data', [([9000, 1, 75]), ([420, 4, 20]), ([1206, 12, 6]),]
+    'input_data',
+    [
+        ([9000, 1, 75]),
+        ([420, 4, 20]),
+        ([1206, 12, 6]),
+    ],
 )
 def test_Training_get_spent_calories(input_data):
     training = homework.Training(*input_data)
