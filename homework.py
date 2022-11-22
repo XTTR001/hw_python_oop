@@ -1,6 +1,7 @@
+import csv
 from dataclasses import dataclass
 from typing import List
-import csv
+from enum import Enum
 
 
 class InvalidInputDataError(Exception):
@@ -30,10 +31,10 @@ class InfoMessage:
 class Training:
     """Расчет показателей тренировки.
 
-    get_distance - расчет дистанции
-    get_mean_speed - расчет скорости
-    get_spent_calories - расчет каллорий
-    show_training_info - показ сообщения тренировки
+    - get_distance - расчет дистанции,
+    - get_mean_speed - расчет скорости,
+    - get_spent_calories - расчет каллорий,
+    - show_training_info - показ сообщения тренировки
     """
 
     LEN_STEP = 0.65
@@ -87,7 +88,7 @@ class Running(Training):
 class SportsWalking(Training):
     CALORIES_WEIGHT_MULTIPLIER = 0.035
     CALORIES_SPEED_HEIGHT_MULTIPLIER = 0.029
-    KMH_IN_MSEC = 0.278  # 0.278 m/s in 1 km/h
+    KMH_IN_MSEC = 0.278  # Training.M_IN_KM / 3600 (секунд в часе)
     CM_IN_M = 100
 
     def __init__(
@@ -117,8 +118,6 @@ class SportsWalking(Training):
 
 
 class Swimming(Training):
-    """Перегрузка методов расчета средней скорости."""
-
     LEN_STEP = 1.38
     CALORIES_WEIGHT_MULTIPLIER = 2
     CALORIES_MEAN_SPEED_SHIFT = 1.1
@@ -147,6 +146,12 @@ class Swimming(Training):
             * self.weight
             * self.duration
         )
+
+
+class TrainingTypes(Enum):
+    SWM = Swimming
+    RUN = Running
+    WLK = SportsWalking
 
 
 TRAININGS = {
@@ -185,7 +190,7 @@ def read_packages_from_file(filename):
 def read_package(workout_type: str, data: List[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
     try:
-        return TRAININGS[workout_type](*data)
+        return TrainingTypes[workout_type].value(*data)
     except (KeyError, TypeError) as err:
         raise InvalidInputDataError(err)
 
@@ -197,5 +202,15 @@ def main(training: Training) -> None:
 
 if __name__ == '__main__':
 
-    for workout_type, data in read_packages_from_file('packages.csv'):
-        main(read_package(workout_type, data))
+    with open('packages.csv') as reader:
+        packages = csv.reader(reader, delimiter=',')
+        for package in packages:
+            workout_type, data = package[0], package[1:]
+            try:
+                main(
+                    read_package(
+                        workout_type, ([float(elem) for elem in data]),
+                    ),
+                )
+            except (ValueError, InvalidInputDataError) as err:
+                print(f'Не корректные входные данные {err}')  # noqa: T201
