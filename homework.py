@@ -31,10 +31,10 @@ class InfoMessage:
 class Training:
     """Расчет показателей тренировки.
 
-    - get_distance - расчет дистанции,
-    - get_mean_speed - расчет скорости,
-    - get_spent_calories - расчет каллорий,
-    - show_training_info - показ сообщения тренировки
+    - get_distance() - расчет дистанции,
+    - get_mean_speed() - расчет скорости,
+    - get_spent_calories() - расчет каллорий,
+    - show_training_info() - показ сообщения тренировки.
     """
 
     LEN_STEP = 0.65
@@ -42,9 +42,9 @@ class Training:
     MIN_IN_H = 60
 
     def __init__(self, action: int, duration: float, weight: float) -> None:
-        self.action: int = action
-        self.duration: float = duration
-        self.weight: float = weight
+        self.action = action
+        self.duration = duration
+        self.weight = weight
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -93,10 +93,10 @@ class SportsWalking(Training):
 
     def __init__(
         self,
-        action: int,
-        duration: float,
-        weight: float,
-        height: float,
+        action,
+        duration,
+        weight,
+        height,
     ) -> None:
         super().__init__(action, duration, weight)
         self.height = height
@@ -124,11 +124,11 @@ class Swimming(Training):
 
     def __init__(
         self,
-        action: int,
-        duration: float,
-        weight: float,
-        length_pool: float,
-        count_pool: float,
+        action,
+        duration,
+        weight,
+        length_pool,
+        count_pool,
     ) -> None:
         super().__init__(action, duration, weight)
         self.count_pool = count_pool
@@ -154,39 +154,6 @@ class TrainingTypes(Enum):
     WLK = SportsWalking
 
 
-TRAININGS = {
-    'SWM': Swimming,
-    'RUN': Running,
-    'WLK': SportsWalking,
-}
-
-
-def read_packages_from_file(filename):
-    packages = []
-    with open(filename) as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            data = []
-            if row['Action']:
-                data.append(float(row['Action']))
-
-            if row['Duration']:
-                data.append(float(row['Duration']))
-
-            if row['Meta1']:
-                data.append(float(row['Meta1']))
-
-            if row['Meta2']:
-                data.append(float(row['Meta2']))
-
-            if row['Meta3']:
-                data.append(float(row['Meta3']))
-
-            packages.append((row['TraingType'], data))
-
-    return packages
-
-
 def read_package(workout_type: str, data: List[float]) -> Training:
     """Прочитать данные полученные от датчиков."""
     try:
@@ -196,20 +163,18 @@ def read_package(workout_type: str, data: List[float]) -> Training:
 
 
 def main(training: Training) -> None:
-
     print(training.show_training_info().get_message())  # noqa: T201
 
 
 if __name__ == '__main__':
-
     with open('packages.csv') as reader:
-        packages = csv.reader(reader, delimiter=',')
+        packages = csv.reader(reader)
         for package in packages:
-            workout_type, data = package[0], package[1:]
+            workout, *data = package
             try:
                 main(
                     read_package(
-                        workout_type, ([float(elem) for elem in data]),
+                        workout, [float(param) for param in data],
                     ),
                 )
             except (ValueError, InvalidInputDataError) as err:
