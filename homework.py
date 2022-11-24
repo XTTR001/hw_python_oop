@@ -1,7 +1,7 @@
 import csv
 from dataclasses import dataclass
-from typing import List
 from enum import Enum
+from typing import List
 
 
 class InvalidInputDataError(Exception):
